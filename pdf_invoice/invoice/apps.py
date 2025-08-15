@@ -6,4 +6,4 @@ class InvoiceConfig(AppConfig):
     name = "invoice"
 
     def ready(self):
-        import invoice.signals 
+        import invoice.signals

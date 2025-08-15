@@ -6,7 +6,7 @@ from .tasks import (
     generate_and_send_invoices,
     resize_user_image
 )
-from .models import Order, UserProfile
+from .models import Order, Items, UserProfile
 
 
 @receiver(post_save, sender=User)
@@ -15,10 +15,10 @@ def send_email_on_user_creation(sender, instance, created, **kwargs):
         send_welcome_email.delay(instance.email)
 
 
-@receiver(post_save, sender=Order)
+@receiver(post_save, sender=Items)
 def invoice_signal(sender, instance, created, **kwargs):
     if created:
-        generate_and_send_invoices.delay(instance.id, instance.user.email)
+        generate_and_send_invoices.delay(instance.order.id, instance.order.user.email)
 
 
 @receiver(post_save, sender=UserProfile)

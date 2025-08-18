@@ -45,7 +45,7 @@ services:
   beat:
     build: .
     container_name: celery_beat
-    command: celery -A pdf_invoice beat -l info --scheduler django_celery_beat.schedulers:DatabaseScheduler
+    command: celery -A pdf_invoice beat -l info
     environment:
       DJANGO_SETTINGS_MODULE: pdf_invoice.settings
       CELERY_BROKER_URL: ${CELERY_BROKER_URL:-amqp://user:pass@rabbitmq:5672//}
@@ -55,21 +55,6 @@ services:
     depends_on:
       - rabbitmq
       - web
-
-  flower:
-    image: mher/flower:latest
-    container_name: flower
-    command: 
-      - "flower"
-      - "--broker=amqp://user:pass@rabbitmq:5672//"
-      - "--port=5555"
-      - "--persistent=True"
-    ports:
-      - "5555:5555"
-    depends_on:
-      - rabbitmq
-      - worker
-      - beat
 
 volumes:
   rabbitmq_data:

@@ -23,11 +23,10 @@ from .tasks import (
     resize_user_image,
 )
 
-# ✅ Temporary media root for tests
+# Temporary media root for tests
 TEMP_MEDIA_ROOT = tempfile.mkdtemp()
 
 
-# ------------------- MODEL TESTS -------------------
 @override_settings(MEDIA_ROOT=TEMP_MEDIA_ROOT)
 class ModelTests(TestCase):
     """
@@ -92,12 +91,10 @@ class ModelTests(TestCase):
             user=self.user,
             image="profile.jpg"
             )
-        # ✅ requires __str__ fix in UserProfile model
         self.assertEqual(str(profile), f"Profile of {self.user.username}")
         self.assertTrue(profile.image.name.endswith("profile.jpg"))
 
 
-# ------------------- SIGNAL TESTS -------------------
 @override_settings(MEDIA_ROOT=TEMP_MEDIA_ROOT)
 class SignalTests(TestCase):
     """
@@ -138,7 +135,7 @@ class SignalTests(TestCase):
 
     @mock.patch("invoice.signals.resize_user_image")
     def test_image_resize_signal_triggered(self, mock_task):
-        """
+        """Add
         Test case for testing the image_resize function.
         """
         image_path = os.path.join(settings.MEDIA_ROOT, "test.jpg")
@@ -149,7 +146,6 @@ class SignalTests(TestCase):
         mock_task.delay.assert_called()
 
 
-# ------------------- TASK TESTS -------------------
 @override_settings(MEDIA_ROOT=TEMP_MEDIA_ROOT)
 class TaskTests(TestCase):
     """
@@ -199,7 +195,7 @@ class TaskTests(TestCase):
         pdf_path = os.path.join(settings.MEDIA_ROOT, f"invoice_{order.id}.pdf")
         self.assertTrue(os.path.exists(pdf_path))
 
-        # ✅ Only invoice email should exist
+        # Only invoice email should exist
         self.assertEqual(len(mail.outbox), 1)
         self.assertIn("Order Invoice", mail.outbox[0].subject)
 

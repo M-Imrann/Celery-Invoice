@@ -21,6 +21,14 @@ from .models import Order
 
 @shared_task(bind=True, max_retries=3)
 def send_welcome_email(self, user_email):
+    """
+    Sends a welcome email to the given user email address.
+
+    Args:
+    User_email: The email address of the user.
+
+    Retries up to 3 times in case of failure with a 10-second delay.
+    """
     try:
         subject = "Welcome Email"
         message = "Hi there,\n\nThank you for\
@@ -39,6 +47,13 @@ def send_welcome_email(self, user_email):
 
 @shared_task
 def generate_and_send_invoices(order_id, user_email):
+    """
+    Generates a PDF invoice for the given order and sends it via email.
+
+    Args:
+    order_id: The ID of the order.
+    user_email: The recipient's email address.
+    """
     order = Order.objects.get(id=order_id)
 
     pdf_path = os.path.join(settings.MEDIA_ROOT, f'invoice_{order_id}.pdf')
@@ -103,6 +118,9 @@ def generate_and_send_invoices(order_id, user_email):
 
 @shared_task
 def send_daily_summary():
+    """
+    Sends a daily summary email to all registered users.
+    """
     for user in User.objects.all():
         send_mail(
             "Daily Summary",
@@ -120,6 +138,14 @@ def send_daily_summary():
         max_retries=5
         )
 def send_data_to_api(self, data):
+    """
+    Sends data to an external API endpoint.
+
+    Args:
+    data : The data to send to the API.
+
+    Automatically retries on failure up to 5 times with exponential backoff.
+    """
     if random.choice([True, False]):
         raise Exception("Simulated API Failure")
 
@@ -130,6 +156,12 @@ def send_data_to_api(self, data):
 
 @shared_task
 def resize_user_image(image_path):
+    """
+    Resizes a user's profile image to multiple predefined sizes.
+
+    Args:
+    image_path: The path to the original image file.
+    """
     sizes = [(100, 100), (300, 300)]
     for size in sizes:
         img = Image.open(image_path)

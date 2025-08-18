@@ -1,0 +1,8 @@
+Django
+celery
+django-celery-beat
+django-celery-results
+reportlab
+Pillow
+requests
+flower

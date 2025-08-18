@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
+import os
 from pathlib import Path
 from celery.schedules import crontab
 
@@ -125,13 +126,14 @@ STATIC_URL = "static/"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-CELERY_BROKER_URL = 'redis://localhost:6379/0'
-CELERY_RESULT_BACKEND = 'django-db'
+CELERY_BROKER_URL = os.getenv("CELERY_BROKER_URL", "amqp://user:pass@rabbitmq:5672//")
+CELERY_RESULT_BACKEND = 'django-db'  # you already have django_celery_results in INSTALLED_APPS
 CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
+CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = True  # helpful when containers start in parallel
 
-# Celery Beat Scheduler (for future periodic tasks)
+# Celery Beat (you already have this)
 CELERY_BEAT_SCHEDULE = {
     'send-daily-email-at-9am': {
         'task': 'invoice.tasks.send_daily_summary',

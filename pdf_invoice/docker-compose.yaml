@@ -1,0 +1,61 @@
+version: '3.9'
+
+services:
+  rabbitmq:
+    image: rabbitmq:3.13-management
+    container_name: rabbitmq
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_DEFAULT_USER:-user}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_DEFAULT_PASS:-pass}
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+
+  web:
+    build: .
+    container_name: django_web
+    command: sh -c "python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
+    environment:
+      DJANGO_SETTINGS_MODULE: pdf_invoice.settings
+      CELERY_BROKER_URL: ${CELERY_BROKER_URL:-amqp://user:pass@rabbitmq:5672//}
+    volumes:
+      - .:/app
+      - media_data:/app/media
+    ports:
+      - "8000:8000"
+    depends_on:
+      - rabbitmq
+
+  worker:
+    build: .
+    container_name: celery_worker
+    command: celery -A pdf_invoice worker -l info
+    environment:
+      DJANGO_SETTINGS_MODULE: pdf_invoice.settings
+      CELERY_BROKER_URL: ${CELERY_BROKER_URL:-amqp://user:pass@rabbitmq:5672//}
+    volumes:
+      - .:/app
+      - media_data:/app/media
+    depends_on:
+      - rabbitmq
+      - web
+
+  beat:
+    build: .
+    container_name: celery_beat
+    command: celery -A pdf_invoice beat -l info
+    environment:
+      DJANGO_SETTINGS_MODULE: pdf_invoice.settings
+      CELERY_BROKER_URL: ${CELERY_BROKER_URL:-amqp://user:pass@rabbitmq:5672//}
+    volumes:
+      - .:/app
+      - media_data:/app/media
+    depends_on:
+      - rabbitmq
+      - web
+
+volumes:
+  rabbitmq_data:
+  media_data:
